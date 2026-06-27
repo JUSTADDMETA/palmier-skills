@@ -1,0 +1,9 @@
+[
+  {
+    "id": "color-grading",
+    "name": "color-grading",
+    "description": "Color grade clips the way a professional colorist does — normalize, balance, match, then build a look — using inspect_color scopes and apply_color (exposure, white balance, wheels, curves, hue curves, LUTs). Use when the user asks to color, grade, match shots, fix white balance, fix exposure, neutralize a cast, or apply a look/film stock.",
+    "sha": "ffab6e20b9c1",
+    "path": "skills/color-grading/SKILL.md"
+  }
+]
