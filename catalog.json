@@ -7,6 +7,13 @@
     "path": "skills/color-grading/SKILL.md"
   },
   {
+    "id": "ugc-editing",
+    "name": "ugc-editing",
+    "description": "Covers assembling raw footage, trimming bad takes and silences, choosing and applying a talking-head/b-roll format (straight intercut, stacked split, or masked/floating overlay), and caption placement for UGC-style content — agnostic to whether the clips are AI-generated or real filmed footage. Use whenever the user wants to edit, cut, assemble, format, or caption UGC-style video, or pick a talking-head + b-roll layout. Picks up after ugc-photo-prompts/ugc-video-prompts if the footage is AI-generated, or after real footage is imported via import_media.",
+    "sha": "1755529ca1e3",
+    "path": "skills/ugc-editing/SKILL.md"
+  },
+  {
     "id": "ugc-photo-prompts",
     "name": "ugc-photo-prompts",
     "description": "Generate ultra-realistic, UGC/influencer-style photos inside Palmier Pro — candid selfies, flash photos, lifestyle shots, and product-in-hand ad creative that read as genuine phone photos instead of AI-generated images. Drives Palmier Pro's get_timeline/get_media/generate_image tools directly (correct aspect ratio, model choice, reference-image handling). Use whenever the user wants UGC-style imagery, influencer selfies, \"make it look like a real iPhone photo,\" authentic/non-AI-looking ad creative, or product photos held by a model — even if they don't say \"UGC\" explicitly.",
