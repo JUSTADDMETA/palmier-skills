@@ -98,6 +98,8 @@ The recipes below are this method with the dials pre-set — apply onto an alrea
 
 ## Notes
 - `apply_color` is the colorist path and folds in LUT + curves + hue curves as live, editable effects. `apply_effect` is for generic, non-color FX — don't grade with it.
+- `get_timeline` exposes each graded clip's `color` object in the same vocabulary — pass that object as `apply_color({ clipIds, color })` to **copy** a whole grade (replaces; mutually exclusive with knobs/`reset`).
+- Mutations return timeline deltas (including updated `color`) — patch from those; don't re-read the whole timeline after every nudge.
 - Trust scopes over the preview for balance — monitors and JPEGs lie about subtle casts; use the frame for composition/look judgment.
 - `lumShift` is an additive HSV value shift in display space, not a linear luma divide, so per-hue darkening won't amplify shadow macroblocks.
 - Curve points are piecewise-linear, clamped flat outside their range — include endpoints near `[0,0]`/`[1,1]` unless you mean to clip.

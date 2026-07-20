@@ -45,15 +45,22 @@ Hailuo 2.3 Pro and other catalog models are available but not part of the defaul
 
 ## Running this inside Palmier Pro
 
-1. **Get the anchor.** Check `get_media` for an existing still that fits; otherwise generate one via. If you have the skill, check `ugc-photo-prompts` first.
-2. **Match the canvas.** `get_timeline` for the project's width/height/fps before picking aspect ratio and duration.
-3. **Generate.** `generate_video` with `startFrameMediaRef` set to the anchor still's id (most models), or `referenceImageMediaRefs` if using Seedance to combine multiple elements. Apply the motion-prompt formula above.
-4. **Verify.** Async, same as images — `get_media` or `inspect_media` on the placeholder id, confirm `generationStatus` is `none` before treating it as ready. One short wait and recheck, don't poll in a loop.
-5. **Assemble the beats.** Once each beat clip is ready, `add_clips`/`insert_clips` onto the timeline in sequence; use `split_clip`/`ripple_delete_ranges` to tighten cuts between beats rather than leaving each clip at its full generated duration.
-6. **Voiceover-only alternative.** If a beat doesn't need lip-synced dialogue (pure b-roll with a VO laid over it), use `generate_audio` (TTS) separately instead of forcing a dialogue-capable video model — cheaper and the audio doesn't have to match mouth movement at all.
-
-## Reference-image rule
-
+1. **Gate.** `get_timeline` — if `canGenerate` is false, ask the user to sign in/subscribe. `list_models({ type: "video" })` before every generate so model ids/caps match the live catalog. Propose model + duration + aspect + prompt; wait for confirmation (paid, not undoable).
+2. **Get the anchor.** `get_media` for an existing still; otherwise run `ugc-photo-prompts` first.
+3. **Match the canvas.** Use project width/height/fps for `aspectRatio` and beat duration.
+4. **Generate.** `generate_video` with `startFrameMediaRef` = anchor still (image-to-video). For Seedance multi-element beats use `referenceImageMediaRefs` / `referenceAudioMediaRefs` / `referenceVideoMediaRefs` and refer to them in the prompt as `@Image1`, `@Audio1`, etc. Apply the motion-prompt formula above. Optional `folder: "UGC/Beats"`.
+5. **Verify.** Async — ready when `get_media({ ids: [placeholder] })` has **no** `generationStatus` (absence = ready). On `failed`, report and ask before retry. Don't busy-poll.
+6. **Assemble the beats.**
+   ```
+   add_clips({
+     entries: [
+       { mediaRef: BEAT1, startFrame: 0 },
+       { mediaRef: BEAT2, startFrame: END1 },   // or use insert_clips to ripple
+     ]
+   })
+   ```
+   Tighten with `split_clips` + `ripple_delete_ranges` / `remove_words` — there is no `split_clip` singular.
+7. **Voiceover-only alternative.** Pure b-roll + VO → `generate_audio` (TTS) instead of a dialogue video model.
 
 ## Worked example
 
