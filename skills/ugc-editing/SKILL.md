@@ -9,254 +9,223 @@ description: Covers assembling raw footage, trimming bad takes and silences, cho
 
 Editing is footage-source-agnostic. The same assemble → trim → layout → caption pipeline applies whether the clips came from `ugc-video-prompts` or a real phone shoot. This skill picks up wherever footage already exists and turns it into a finished vertical post. The single biggest editing mistake in UGC is padding — long pauses, repeated stumbles, slow setups. Cut harder than feels comfortable. Authentically raw ≠ unedited; it means tight pacing with natural-sounding joins.
 
+**Tool model (current Palmier):** timeline positions are project frames; source trims are seconds via `source: [start, end]`. Linked A/V is folded into the video clip as `audio: { id, … }` — mute/edit audio by that nested id. Mutations return a timeline delta — patch from it; don't re-`get_timeline` after every call. Index **0 renders on top**.
+
 ---
 
 ## Step 0: Pre-flight — always run before touching the timeline
 
-1. **`get_timeline`** — check `width`/`height`. Must be 1080×1920 (9:16). If not:
+1. **`get_timeline`** — check resolution / `canGenerate`. Must be 9:16 (typically 1080×1920). If not:
    ```
    set_project_settings({ aspectRatio: "9:16", quality: "1080p" })
    ```
-   Do this **before** placing any clips. The project snaps to the first clip's aspect ratio on placement — if you place a 16:9 clip first and then fix it, all transforms recalculate and you lose your layout. Set 9:16 first, always.
+   Do this **before** placing clips. Explicitly configured settings stick (the first clip no longer snaps the project to its source aspect — placement may only note a mismatch).
 
-2. **`get_media`** — identify A-roll clip(s) and available b-roll. Note durations and sourceWidth/sourceHeight for each.
+2. **`get_media`** — identify A-roll and b-roll. Note `durationSeconds`, width/height, `hasAudio`.
 
 3. **`inspect_media`** on the A-roll:
-   - First pass: `overview: true` — one storyboard, read the segment timestamps.
-   - Second pass: `wordTimestamps: true`, full duration — read the entire word list as prose before cutting anything. You're looking for: retakes (same sentence said twice), filler words ("um", "like", "you know", "and I..."), false starts, trailing dead air after the last real word, and sections that are off-topic or weak.
+   - First: `overview: true` — storyboard + segment timestamps.
+   - Then: `wordTimestamps: true` (window long clips with `startSeconds`/`endSeconds`) — read words as prose before cutting. Look for retakes, fillers, false starts, trailing dead air, weak sections.
 
 ---
 
 ## Step 1: Place A-roll only — no b-roll yet
 
 ```
-add_clips([{
-  mediaRef: AROLL_ID,
-  startFrame: 0,
-  durationFrames: FULL_DURATION_IN_PROJECT_FRAMES,
-  trimStartFrame: TRIM_IF_NEEDED   // skip pre-roll silence
-}])
-// NO trackIndex — auto-creates V1 + A1
+add_clips({
+  entries: [{
+    mediaRef: AROLL_ID,
+    startFrame: 0,
+    // whole asset, or trim in SOURCE seconds (not project frames):
+    source: [SKIP_PREROLL_S, END_S]   // omit for full file
+  }]
+})
+// omit trackIndex on every entry → auto-creates video + linked audio tracks
 ```
 
-- **Never specify `trackIndex` here.** Auto-creation puts A-roll on track 0 (V1). B-roll will go above it later on a new auto-created track.
-- If the source is 16:9, the project will snap back to 16:9. Reset immediately:
+- **Never pass `trackIndex` here** when you want a fresh storyline track. Omitting it auto-creates one shared video track (and linked audio). Specifying an existing index can overwrite whatever is already there.
+- There is no `durationFrames` / `trimStartFrame` on `add_clips` — use `source: [startSeconds, endSeconds]` for source span, or `endFrame` (mutually exclusive with `source`) for an exact timeline occupy range.
+- 16:9 A-roll in a 9:16 project may letterbox. Cover-crop the talking head to full frame:
   ```
-  set_project_settings({ aspectRatio: "9:16", quality: "1080p" })
+  apply_layout({
+    layout: "full",
+    slots: [{ slot: "main", clipIds: [AROLL_CLIP_ID], anchor: "center" }]
+  })
   ```
-- `durationFrames`: source duration in seconds × project fps. E.g. 69s at 60fps = 4140 frames. With `trimStartFrame: 780` (13s × 60fps), duration = (69 − 13) × 60 = 3360 frames.
+  Prefer `apply_layout` over `set_clip_properties` transforms — layout sets transform **and** crop together (transform-only leaves a stale crop and can stretch).
 
 ---
 
-## Step 2: Cut bad takes and filler — always words, never frames
+## Step 2: Cut bad takes and filler — words first
 
-**Read first, cut once.** Call `get_transcript`, read every word, mark everything to cut, then fire a single `remove_words` call with all indices at once. Do not make multiple sequential `remove_words` calls — indices shift after each cut.
+Prefer `remove_silence` first for dead air (no transcript), then word cuts.
+
+**Read first, cut once per pass.** `get_transcript` → mark indices → one `remove_words` call. Indices shift after every cut — re-read before the next pass.
 
 ```
 get_transcript()
-// read entire word list as prose, identify all cuts
 remove_words({
   words: [
-    [FIRST_RETAKE_START, FIRST_RETAKE_END],   // full duplicate take
-    FILLER_INDEX,                              // single filler word e.g. "Um"
-    [FALSE_START_START, FALSE_START_END],      // e.g. "and I..."
-    [RETAKE_2_START, RETAKE_2_END],            // second retake of same section
-    [TRAILING_FILLER_START, TRAILING_FILLER_END], // e.g. "and yeah, that's basically it"
+    [FIRST_RETAKE_START, FIRST_RETAKE_END],
+    FILLER_INDEX,
+    [FALSE_START_START, FALSE_START_END],
   ],
-  cutAggressiveness: "tight"   // "balanced" if joins sound clipped
+  cutAggressiveness: "tight"   // "balanced" / "loose" if joins feel clipped
 })
+// bulk fillers: remove_words({ matches: ["um", "uh", "hmm"] })
 ```
 
-**What to cut:**
-- Every retake except the best one. Keep the take that's most fluent and energetic — usually the second or third attempt, rarely the first.
-- Filler words: "um", "uh", "like", "you know", "so", "anyway", "and I...", "I mean".
-- False starts: anything where the speaker restarts mid-sentence.
-- Trailing dead air: words at the end that don't add value ("and yeah", "so... yeah", "and that's it I guess").
-- Off-topic tangents: sections that break the hook → value → CTA arc.
+**What to cut:** duplicate retakes (keep the most fluent), fillers, false starts, trailing soft endings, off-topic tangents that break hook → value → CTA.
 
-**What to keep:**
-- Natural pauses between genuine thoughts — don't over-tighten to the point it sounds robotic.
-- The best single take of each section.
-- The outro/CTA even if it feels soft — viewers who made it to the end convert.
+**What to keep:** natural pauses between real thoughts; best take of each section; the outro/CTA.
 
-**Caption track blocks ripple:** If captions already exist on the timeline, `remove_words` will refuse with a sync-lock error. Always `remove_tracks` on the caption track first, cut, then re-add captions. Never add captions before cutting is finished.
+**Captions block ripple:** if a caption track exists, remove it before cutting:
+```
+manage_tracks({ remove: [{ trackId: CAPTION_TRACK_ID }] })
+// or remove: [index] — prefer trackId from get_timeline
+```
+Then cut, then re-add captions. Never caption before cutting is finished. There is no `remove_tracks` tool.
 
 ---
 
 ## Step 3: Pick a layout format
 
-Read what the b-roll is actually doing before choosing:
+**Format 0 — Straight intercut (default)**  
+B-roll is supplementary, not simultaneous. Hard cuts alternating full-frame A-roll and b-roll on the **same** video track every 3–5s. Use `add_clips` (overwrite landing region) or `insert_clips` (ripple — requires `trackIndex`) — no layout tool.
 
-**Format 0 — Straight intercut (default)**
-Use when: b-roll is supplementary, not simultaneous. The viewer can handle switching fully between the two.
-- Just hard cuts alternating A-roll and b-roll on the same track.
-- Each clip fills the full 9:16 frame — no compositing needed.
-- Cut every 3–5s to maintain pace.
-- Use `add_clips` or `insert_clips` on track 0, no layout tool needed.
+**Format 1 — Stacked split, b-roll top / talking head bottom**  
+B-roll is proof (product/result/location). Viewer needs both at once. `layout: "top_bottom"`, b-roll → `top`, head → `bottom`.
 
-**Format 1 — Stacked split, b-roll top / talking head bottom**
-Use when: b-roll is proof — it's demonstrating the product, result, or location being described. The viewer needs to see both simultaneously to connect the narration to the visual.
-- B-roll on top half, talking head on bottom half.
-- This is the proven format for product demos, location callouts, and "look at this" UGC.
+**Format 2 — Stacked split, head top / b-roll bottom**  
+B-roll is filler/retention. Same layout, slots flipped.
 
-**Format 2 — Stacked split, talking head top / b-roll bottom**
-Use when: b-roll is filler — satisfying visuals, gameplay, or ambient footage that holds attention but isn't load-bearing. The narration is the content; the secondary visual is just retention.
-- Talking head on top, filler on bottom.
-- Don't default to Format 1 ordering here — it's a different job.
-
-**Format 3 — Full-bleed b-roll, floating talking head**
-Use when: the b-roll visual is the hero (a landscape, a product in action, a demo) and the person is commentary. Not yet supported cleanly via `apply_layout` — requires `apply_effect` (chroma key) + manual `set_clip_properties`. Skip unless the user specifically asks for it.
+**Format 3 — Full-bleed b-roll, floating head**  
+Not clean via `apply_layout` alone — needs chroma/`apply_effect` + manual framing. Skip unless asked.
 
 ---
 
-## Step 4: Add b-roll to a new track — critical placement rules
+## Step 4: Place b-roll
+
+### Format 0 — intercut on the storyline track
 
 ```
-add_clips([
-  { mediaRef: BROLL_1, startFrame: 0,    durationFrames: SEGMENT_1_FRAMES },
-  { mediaRef: BROLL_2, startFrame: S1,   durationFrames: SEGMENT_2_FRAMES },
-  { mediaRef: BROLL_1, startFrame: S2,   durationFrames: SEGMENT_3_FRAMES },
-  // tile to cover totalFrames exactly
-])
-// NO trackIndex on ANY entry
+add_clips({
+  entries: [
+    { mediaRef: BROLL_1, startFrame: F0, source: [0, 4] },
+    { mediaRef: BROLL_2, startFrame: F1, source: [0, 3] },
+  ]
+})
+// same track as A-roll → overwrites those ranges (split/trim under the hood)
 ```
 
-**Critical rules — these caused every redo:**
+Mute any linked b-roll audio (nested `audio.id` on each placed video, or mute the b-roll audio track via `manage_tracks`).
 
-1. **Never specify `trackIndex`** on b-roll `add_clips` entries. Omitting it auto-creates a new top video track (V2) above V1. Specifying `trackIndex: 0` destroys the A-roll by overwriting it on V1. This is the single most common mistake.
+### Format 1–2 — stacked split (critical: span-scope the head)
 
-2. **Tile b-roll to cover the full timeline.** Each b-roll clip is N seconds × project fps frames. At 60fps, a 6s clip = 360 frames. Calculate: `totalFrames / 360` → round up → that many tiles. Last tile's `durationFrames` = `totalFrames - (N-1 × 360)`.
+`apply_layout` on an existing clip is **whole-clip** (time-invariant). If you layout the entire A-roll into `bottom`, the head stays half-frame for the whole video — including stretches with no b-roll (black / empty top).
 
-3. **Mute b-roll audio immediately** after placement — grab the linked audio clip IDs from the `add_clips` response:
+**Do this instead:**
+
+1. `split_clips` the A-roll at each b-roll span boundary so overlay segments are their own clips.
+2. `add_clips` each b-roll tile on a **new** track (omit `trackIndex` on the whole batch) covering exactly those frames — use `startFrame` + `source` or `endFrame`.
+3. Mute b-roll audio immediately:
    ```
    set_clip_properties({
-     clipIds: [ALL_BROLL_AUDIO_IDS_FROM_RESPONSE],
+     clipIds: [BROLL_AUDIO_NESTED_IDS],  // video.audio.id from timeline/delta
      volume: 0
    })
    ```
-   If you skip this, captions will transcribe b-roll dialogue and generate wrong caption text.
+4. For each overlapping pair, `apply_layout`:
+   ```
+   apply_layout({
+     layout: "top_bottom",
+     slots: [
+       { slot: "top",    clipIds: [BROLL_CLIP_ID], anchorY: 0.4 },
+       { slot: "bottom", clipIds: [AROLL_SEGMENT_ID], anchor: "center" }
+     ]
+   })
+   ```
+5. Leave non-overlay A-roll segments full-frame (`layout: "full"` only if something dirtied them).
 
-4. **Do not use `insert_clips`** for b-roll. It ripples the A-roll forward, destroying sync. Only use `add_clips`.
+**Do not** use `insert_clips` for overlay b-roll — it ripples the storyline and breaks sync. **Do not** build splits with `set_clip_properties` / `set_keyframes` transforms.
 
----
-
-## Step 5: Apply layout with apply_layout — not set_clip_properties
-
-For **every b-roll clip**, pair it with the A-roll clip it overlaps and call `apply_layout`:
-
-```
-apply_layout({
-  layout: "top_bottom",   // or "top_bottom" with slots flipped for Format 2
-  slots: [
-    { clipId: BROLL_CLIP_ID, slot: "top" },
-    { clipId: AROLL_CLIP_ID, slot: "bottom" }
-  ]
-})
-```
-
-**Pairing rule:** A b-roll clip at frames [X, X+360] should be paired with whichever A-roll clip contains frame X. Get the A-roll clip list from `get_timeline` and map each b-roll clip to its overlapping A-roll clip.
-
-**"Clips never play at the same time" error:** `apply_layout` refuses if the two clips have no overlapping frames. This happens when a b-roll clip's range falls between two A-roll clips (due to cuts). Fix: pair it with the A-roll clip with the most frame overlap. If there's still no overlap (e.g. a 2-frame A-roll gap clip), use `set_clip_properties` as a fallback:
-```
-set_clip_properties({
-  clipIds: [BROLL_CLIP_ID],
-  transform: { centerX: 0.5, centerY: 0.25, height: 0.5, width: 1.616 }
-})
-set_clip_properties({
-  clipIds: [AROLL_CLIP_ID],
-  transform: { centerX: 0.5, centerY: 0.75, height: 0.5, width: 1.58 }
-})
-```
-
-**Verify after all layout calls:** Call `get_timeline` and check every A-roll clip has `centerY: 0.75, height: 0.5` and every b-roll clip has `centerY: 0.25, height: 0.5`. Any clip showing `height: 0.316` was missed — re-apply layout for that pair.
-
-**Never use `set_clip_properties` for layout when `apply_layout` works.** `apply_layout` also sets the correct crop so the subject fills the slot without stretching. Manual transforms skip the crop and can leave black bars.
+Optional shortcut for a single continuous stacked section: `apply_layout` **placement** mode with `mediaRef` in every slot + `startFrame`/`endFrame` creates stacked tracks for that range only — useful when A-roll isn't already on the timeline for that span. Don't mix `mediaRef` and `clipIds` across slots in one call.
 
 ---
 
-## Step 6: Add captions — scoped, placed, styled correctly
+## Step 5: Captions
+
+`add_captions` finds spoken audio itself — there is **no `clipIds` filter**. Mute all b-roll / non-dialogue audio **before** captioning or captions will pick up the wrong speech.
 
 ```
 add_captions({
-  clipIds: [ALL_AROLL_VIDEO_CLIP_IDS],  // ALWAYS scope to A-roll only
-  animation: "highlightPop",             // or "wordPop" for simpler style
-  centerY: 0.5,                          // at the seam for stacked split; 0.82 for full-frame
-  color: "#FFFFFF",
-  highlightColor: "#FFD700",             // gold highlight, or brand color
-  fontSize: 48,                          // 48 for stacked split; 60+ for full-frame
-  isBold: true,
+  animation: "highlightPop",          // or "wordPop"
+  highlightColor: "#FFD700",
   maxWords: 3,
-  textCase: "auto"                       // NOT "upper" — natural case
+  transform: { centerY: 0.5 },        // 0.5 seam (split); 0.82 lower-third (full-frame)
+  style: {
+    color: "#FFFFFF",
+    bold: true,
+    fontSize: 48,                     // ~48 split; 60+ full-frame
+    fontCase: "mixed"                 // NOT "uppercase" — natural case
+  }
 })
 ```
 
-**Placement by format:**
-- **Format 0 (straight intercut):** `centerY: 0.82` — lower third of full frame, above the UI band.
-- **Format 1–2 (stacked split):** `centerY: 0.5` — exactly at the seam between top and bottom halves. This is where eyes land naturally and it clears both the visual proof area and the talking head.
-- **Format 3 (floating head):** `centerY: 0.82` — lower third of the full-bleed b-roll frame.
-
-**Critical rules:**
-- **Always pass `clipIds`** scoped to A-roll video clips. Omitting `clipIds` transcribes all audio on the timeline including b-roll — this generates wrong caption text pulled from b-roll dialogue instead of the actual speaker. Always explicit.
-- **`textCase: "auto"`** — natural sentence case. `"upper"` bakes uppercase into the text string and cannot be changed via `update_text` — you'd have to delete the track and regenerate.
-- **Captions are not editable for case after generation.** If the user wants a different case, `remove_tracks` on the caption track and regenerate.
-- **`highlightPop`** animates each word as it's spoken with a color highlight — preferred for talking-head UGC. `wordPop` is simpler and works when the highlight feel is too busy.
-- To restyle an existing caption group without regenerating: `update_text({ captionGroupId: ID, ... })` — supports color, font, animation, transform. Does not support textCase.
+- Restyle later: `update_text({ captionGroupId, style: {…}, transform: {…}, animation })`.
+- `fontCase` is display casing (`mixed` / `uppercase` / `lowercase`). Prefer `mixed`.
+- Caption clips show as `captionGroups` summaries on `get_timeline` — use `captionDetail: true` only when editing individual caption clips.
 
 ---
 
-## Step 7: Verify with inspect_timeline
+## Step 6: Verify
 
 ```
 inspect_timeline({ startFrame: 0, endFrame: totalFrames, maxFrames: 6 })
 ```
 
-Check every frame sample for:
-- ✅ B-roll filling the top half — no black (means b-roll ran short, add another tile)
-- ✅ Talking head cleanly in the bottom half
-- ✅ Captions visible at the seam
-- ✅ No duplicate A-roll (two versions of the talking head stacked) — if visible, `get_timeline` and look for any clip with `height: 0.316` on a video track; that's a phantom, remove it
+Check samples for: b-roll filling its half only during overlay spans; talking head full-frame elsewhere; captions at the seam/lower-third; no stretched clips (stale crop — reset with `apply_layout` `full`).
 
 ---
 
-## Common failure modes and exact fixes
+## Common failure modes
 
-| Symptom | Root cause | Fix |
+| Symptom | Cause | Fix |
 |---|---|---|
-| B-roll overwrites A-roll | `trackIndex: 0` on b-roll `add_clips` | Remove b-roll clips, re-add without `trackIndex` |
-| "Clips never play at the same time" | B-roll and A-roll don't overlap in frames | Use `set_clip_properties` fallback with explicit transform values |
-| Captions show b-roll dialogue | `add_captions` called without `clipIds` | Remove caption track, re-add with `clipIds` scoped to A-roll |
-| Project snaps to 16:9 after first clip | Source is 16:9, placed before setting canvas | `set_project_settings` 9:16 immediately after, re-verify layout |
-| Duplicate A-roll visible | `apply_layout` with `mediaRef` slots created new clips | Delete phantom clips (height: 0.316 on video track) |
-| Captions stuck uppercase | `textCase: "upper"` baked into text content | `remove_tracks` caption track, regenerate with `textCase: "auto"` |
-| A-roll clip not bottom-half | Missed in `apply_layout` loop | Check all A-roll clips for `height: 0.316`, re-apply layout |
-| `remove_words` refused (sync-lock) | Caption track exists and can't ripple | `remove_tracks` captions first, cut, re-add captions after |
-| B-roll audio audible | Forgot to mute after `add_clips` | `set_clip_properties` volume 0 on all b-roll audio clip IDs |
+| B-roll overwrites A-roll | `trackIndex` pointed at storyline | Re-add b-roll with `trackIndex` omitted |
+| Head stuck in bottom half forever | `apply_layout` on whole A-roll clip | Split A-roll; layout only overlay segments |
+| Clip looks stretched | Transform without clearing crop | `apply_layout({ layout: "full", slots: [{ slot: "main", clipIds: [ID] }] })` |
+| Captions from b-roll dialogue | B-roll audio still audible | `volume: 0` on nested b-roll audio ids, then regenerate captions |
+| `remove_words` sync-lock | Caption track present | `manage_tracks` remove caption track → cut → re-caption |
+| `add_clips` rejected | Used `durationFrames` / bare array | Use `{ entries: [{ mediaRef, startFrame, source? }] }` |
+| Stale timeline mental model | Re-read skipped after foreign edits | Patch from mutation deltas; `get_timeline` after failures / user edits |
 
 ---
 
-## Track order — end state reference
+## Track order — typical end state
 
-| Index | Label | Content |
-|---|---|---|
-| 0 | V3 | Captions (text) |
-| 1 | V2 | B-roll video (top half, muted audio on A2) |
-| 2 | V1 | A-roll video (bottom half) |
-| 3 | A1 | A-roll audio |
-| 4 | A2 | B-roll audio (volume: 0) |
+Index **0 = top** (what you see on top in the preview).
+
+| Index | Content |
+|---|---|
+| 0 | Captions (text) |
+| 1 | B-roll video (muted linked audio) |
+| 2 | A-roll video |
+| … | A-roll audio (linked; may appear as nested `audio` on the video clip) |
 
 ---
 
 ## Pacing benchmarks
 
-- Hook in the first 2–3 seconds — if the first line doesn't earn the next second, nothing after it matters.
+- Hook in the first 2–3 seconds.
 - A cut, b-roll switch, or caption change roughly every 3–5 seconds.
-- Most UGC ads: 15–60 seconds. Shorter skews better on TikTok; 30–45s is the sweet spot for Instagram Reels with a CTA.
+- Most UGC ads: 15–60s (30–45s sweet spot for Reels with CTA).
 - Captions are not optional — most social video is watched muted.
-- If the talking head is AI-generated, go b-roll-heavy — keep talking head segments to 2–3s max before cutting to b-roll. Longer holds on AI faces trigger skepticism.
+- AI talking heads: keep faces to 2–3s before cutting to b-roll.
 
 ---
 
 ## Guardrails
 
-- Build fictional, generic personas — don't edit in a specific real, identifiable person without their consent, and don't recreate a named public figure's likeness.
+- Build fictional, generic personas — don't edit in a specific real, identifiable person without consent, and don't recreate a named public figure's likeness.
 - Keep wardrobe/pose/action choices brand-safe and non-sexualizing by default; only go further if the user explicitly asks.

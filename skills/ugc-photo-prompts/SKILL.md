@@ -80,14 +80,18 @@ Format: candid iPhone photo, 4:5. Framing: mid-distance, chest-up or mid-thigh, 
 
 This skill drives Palmier Pro's MCP tools directly. Standard sequence:
 
-1. **Match the canvas.** Call `get_timeline` first. Use its `width`/`height` to derive the aspect ratio for `generate_image` instead of defaulting to 4:5 — a 9:16 project wants 9:16 stills, not feed-style crops the user will have to reframe.
-2. **Check for an existing reference asset.** Call `get_media` and look for a product/subject photo already in the library before describing one from scratch in prose. If one exists, pass its id in `referenceMediaRefs` — see the reference-image rule below for when this is and isn't appropriate.
-3. **Pick the model based on what matters more, not habit:**
-   - **Realism / "doesn't look AI" is the priority** (most UGC, most influencer selfies) → `nano-banana-pro`. In side-by-side testing it held skin micro-texture and followed specific lighting instructions more faithfully, at meaningfully higher resolution.
-   - **The product itself must read clearly and unmistakably** (catalog-adjacent, hero product shot) → `gpt-image-2` tends to frame the product more prominently, at some cost to skin/lighting realism.
-   - This is a real tradeoff observed empirically, not a fixed rule — when it matters, generate one of each and compare rather than assuming.
-4. **Generate, then verify.** `generate_image` is async — call `get_media` (or `inspect_media` on the returned placeholder id) to confirm `generationStatus` is `none` before treating the asset as ready. Don't poll in a tight loop; one short wait and recheck is enough.
-5. **Place it.** Once ready, `add_clips` or `insert_clips` onto the timeline at the right track/frame if the user wants it in the edit, not just sitting in the library.
+1. **Session / canvas.** `get_timeline` first. If `canGenerate` is false, stop and ask the user to sign in + subscribe before any `generate_*`. Derive `aspectRatio` from project width/height — a 9:16 project wants 9:16 stills, not default 4:5.
+2. **Models.** Always `list_models({ type: "image" })` before generating — ids and caps change. Then pick:
+   - **Realism / "doesn't look AI"** (most UGC) → `nano-banana-pro` (or whatever the catalog currently lists as Nano Banana Pro).
+   - **Product must read unmistakably** → GPT Image family (`gpt-image-2` when available).
+   - When it matters, generate one of each and compare. Propose model + prompt to the user before spending credits (generation is paid and not undoable).
+3. **References.** `get_media` for an existing product/subject still; pass ids in `referenceMediaRefs`. Optional `folder: "UGC/Stills"` keeps campaign assets grouped (folder paths, not folder ids).
+4. **Generate, then verify.** `generate_image` returns a placeholder immediately. Ready when `get_media({ ids: [placeholder] })` shows **no** `generationStatus` field (absence = ready). Values like `preparing` / `generating` / `downloading` / `failed` mean not ready — on `failed`, tell the user and ask before retrying. Don't busy-poll.
+5. **Place it.** If the user wants it on the timeline:
+   ```
+   add_clips({ entries: [{ mediaRef: ID, startFrame: F, source: [0, HOLD_SECONDS] }] })
+   ```
+   Use `insert_clips` (requires `trackIndex`) only when rippling into an existing track. Omit `trackIndex` on `add_clips` to auto-create a track.
 
 ## Using reference images (referenceMediaRefs)
 
@@ -99,7 +103,7 @@ This skill drives Palmier Pro's MCP tools directly. Standard sequence:
 - If you have more than one angle of the same product, passing multiple `referenceMediaRefs` generally improves shape fidelity, especially for less common silhouettes.
 - Reference images don't need to match the output's aspect ratio — the model extracts the subject, not the canvas.
 - Reuse the same `mediaRef` across multiple `generate_image` calls when you want one product/subject to appear consistently across a set of different scenes ("campaign" look) rather than re-uploading or re-describing it each time.
-- Keep product reference assets in their own `folderId` in the media library so `get_media` surfaces them quickly for reuse later.
+- Keep product reference assets under a folder path (e.g. `generate_image({ folder: "UGC/Products", … })` or `organize_media` moves) so `get_media({ folder })` surfaces them quickly.
 
 ## Guardrails
 
