@@ -41,10 +41,13 @@ whether five eras is right.
    not assume 24fps. (The reference build that produced the numbers in Step 3 happened to
    run at 24fps, 1280×720; a 30fps project needs every frame count recalculated, e.g. an
    11s clip is 264 frames at 24fps but 330 frames at 30fps.)
-2. **Images gate the videos.** Generate ALL character sheets first (they're the video
-   references) and WAIT for them to finish. You cannot generate the era videos until their
-   sheets exist, because each video passes its era sheet as `referenceImageMediaRefs`.
-3. **Once sheets are ready, fire EVERYTHING else in parallel and don't block:**
+2. **HARD GATE — photos before videos.** Generate ALL character sheets first and **do not
+   call `generate_video` (or start any era clip) until every sheet is fully finished** —
+   `get_media` shows **no** `generationStatus` on each. Placeholders / still-generating
+   sheets are not enough. Videos take those sheets as `referenceImageMediaRefs`; firing
+   them early means broken or missing identity. Music may wait with the video batch, but
+   **never** ahead of sheet readiness.
+3. **Only after ALL sheets are ready, fire EVERYTHING else in parallel and don't block:**
    - Generate all 6 era videos in one batch.
    - Generate the music track.
    - As each generation returns a placeholder id, **immediately place it on the timeline
@@ -115,11 +118,15 @@ face). `aspectRatio: "landscape_16_9"`, model `seedream-v5-pro`, folder e.g.
 - **Modern — man:** `in modern-day casual clothing — fitted black t-shirt or henley under a black leather jacket, dark denim jeans`
 - **Modern — woman:** `in an elegant modern evening outfit — a fitted burgundy satin slip dress with thin straps and a cutout side detail, hair worn naturally down and slightly wavy, delicate thin necklace, subtle elegant makeup`
 
-**WAIT** for all sheets to be ready (`get_media` shows no `generationStatus`) before Step 2.
+**STOP here until every sheet is done.** Confirm with `get_media({ ids: [...] })` that
+**none** of the 12 sheet assets still have a `generationStatus`. Do **not** open Step 2,
+do **not** call `generate_video`, and do **not** place era clips until that check passes.
+(Placing *video* placeholders while *videos* generate is fine later — placing or generating
+videos off unfinished *photos* is not.)
 
 ---
 
-## STEP 2 — Era videos (fire all 6 in one batch, place placeholders immediately)
+## STEP 2 — Era videos (ONLY after all sheets are finished — then fire all 6 + place placeholders)
 
 Shared style spine for EVERY clip (this is the signature look — keep verbatim):
 
@@ -418,9 +425,10 @@ plays under it — don't leave the card sitting in silence.
 ## Recap of the parallelization (the heart of the skill)
 1. Get 2 images + 2 names (ASK if missing). `get_timeline`; verify `canGenerate`.
 2. `list_models`. Fire ALL 12 character sheets (Seedream, `landscape_16_9`, both user refs
-   on each). **WAIT** for readiness.
-3. Fire ALL 6 era videos (Seedance 2, 720p, 11s / finale 14s, each era's 2 sheets as refs)
-   + the music (ElevenLabs, 90s instrumental) — one burst, no waiting between.
+   on each). **Block until every sheet is finished** (no `generationStatus`). No videos yet.
+3. **Only then** fire ALL 6 era videos (Seedance 2, 720p, 11s / finale 14s, each era's 2
+   finished sheets as refs) + the music (ElevenLabs, 90s instrumental) — one burst, no
+   waiting between videos/music.
 4. As each placeholder id returns, immediately `add_clips` it onto the timeline in story
    order (videos contiguous on V1; music on its own track); set music to 0.25 + fade
    keyframes; `add_texts` the name card. Everything is wired before renders finish.
@@ -428,7 +436,9 @@ plays under it — don't leave the card sitting in silence.
    `inspect_timeline` at a few frames, offer an `export_project`.
 
 ## Guardrails
-- Never proceed without the two images and two names — that's the one hard gate.
+- Never proceed without the two images and two names — hard gate #1.
+- Never generate era videos until all character sheets are fully ready — hard gate #2.
+  Unfinished photos ⇒ do not call `generate_video`.
 - Costs real money (generation) and isn't undoable — this skill implies the user has
   approved generating the full set; if they seem unsure, confirm scope (5 eras vs fewer)
   once before the big batch, then go.
