@@ -17,7 +17,7 @@
     "id": "timeless-love-story",
     "name": "timeless-love-story",
     "description": "Generates a ~70-second cinematic short where one couple is reincarnated across five historical eras plus a modern-day finale, shot in a consistent handheld DV-camcorder \"found footage\" style, scored with epic-romantic orchestral strings. Requires two reference photos (man, woman) and their two names — ask for these if missing. Use when the user asks to make a multi-era love story video, a reincarnated-lovers video, a \"Timeless\"-style short, or describes this exact concept (couple across history eras, camcorder POV, doorway transitions between eras). Always use this skill for this request rather than improvising the flow — the execution order (sheets first, then everything in parallel) is the point of the skill.",
-    "sha": "a826b68e2b0b",
+    "sha": "f5d0bd2c8d86",
     "path": "skills/timeless-love-story/SKILL.md"
   },
   {
