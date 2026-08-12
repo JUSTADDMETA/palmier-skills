@@ -14,6 +14,13 @@
     "path": "skills/color-grading/SKILL.md"
   },
   {
+    "id": "create-skill-from-timeline",
+    "name": "create-skill-from-timeline",
+    "description": "Reverse-engineer a finished Palmier Pro timeline into a reusable SKILL.md that recreates the same edit from the same footage with no prior context, or applies the same style to new footage with minimal tweaks. Use when the user asks to create a skill, save a template, distill this edit into a playbook, document how this video was built, or turn a timeline / chat session into a reusable workflow.",
+    "sha": "f1fecf5839ba",
+    "path": "skills/create-skill-from-timeline/SKILL.md"
+  },
+  {
     "id": "multi-cam-editing",
     "name": "multi-cam-editing",
     "description": "Edit multi-camera / shared-audio sessions (podcasts, interviews, panels) inside Palmier Pro — create a multicam group first, verify sync and mic-to-person mapping, then cut angles to the speaker with wide/layout moments for overlap. Use whenever the footage has multiple cameras, multiple mics, dual-system sound, or the user mentions multicam, multi-cam, podcast edit, interview cut, camera switching, or synced audio.",
