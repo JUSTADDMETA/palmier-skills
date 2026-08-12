@@ -7,6 +7,20 @@
     "path": "skills/caption-templates/SKILL.md"
   },
   {
+    "id": "character-pipeline",
+    "name": "character-pipeline",
+    "description": "Builds consistent characters in Palmier Pro via hero still to multi-angle identity sheet to scene placement still to generate_video with ranked referenceImageMediaRefs (@Image1/@Image2/@Image3). Use when the same face must survive across shots, casting someone into a new environment, Seedance identity lock, or photoreal consistency before video. Not for quick UGC talking-head anchors — use ugc-photo-prompts for those.",
+    "sha": "c65536b4eaa6",
+    "path": "skills/character-pipeline/SKILL.md"
+  },
+  {
+    "id": "cinematic-motion",
+    "name": "cinematic-motion",
+    "description": "Writes Palmier generate_video motion prompts with documentary handheld texture, timed effects inventories, density maps, and one signature visual moment so Seedance/Kling clips feel captured. Use for photoreal editorial motion, unstable handheld, rack focus, micro-gestures, beauty/product clips, or dialogue-to-camera moments that should look like a real shooter was rolling.",
+    "sha": "6b709f837846",
+    "path": "skills/cinematic-motion/SKILL.md"
+  },
+  {
     "id": "color-grading",
     "name": "color-grading",
     "description": "Color grade clips the way a professional colorist does — normalize, balance, match, then build a look — using inspect_color scopes and apply_color (exposure, white balance, wheels, curves, hue curves, LUTs). Use when the user asks to color, grade, match shots, fix white balance, fix exposure, neutralize a cast, or apply a look/film stock.",
@@ -19,6 +33,13 @@
     "description": "Edit multi-camera / shared-audio sessions (podcasts, interviews, panels) inside Palmier Pro — create a multicam group first, verify sync and mic-to-person mapping, then cut angles to the speaker with wide/layout moments for overlap. Use whenever the footage has multiple cameras, multiple mics, dual-system sound, or the user mentions multicam, multi-cam, podcast edit, interview cut, camera switching, or synced audio.",
     "sha": "0ced8caf49ed",
     "path": "skills/multi-cam-editing/SKILL.md"
+  },
+  {
+    "id": "podcast-ad",
+    "name": "podcast-ad",
+    "description": "Builds converting podcast-style ads in Palmier Pro as an overheard two-person conversation — sceptic arc, believer mechanism, matching start frames, mic-in-shot staging, segmented generate_video beats, timeline assembly, and captions. Use for podcast ads, UGC conversation ads, sceptic-to-believer product spots — not for single-hook talking-head ads (use ugc-video-prompts).",
+    "sha": "b7cec2abcc6e",
+    "path": "skills/podcast-ad/SKILL.md"
   },
   {
     "id": "timeless-love-story",
@@ -47,5 +68,12 @@
     "description": "Generate ultra-realistic UGC/influencer-style video clips inside Palmier Pro — talking selfies, product demos, candid lifestyle motion — using the proven still-then-animate pipeline instead of cold text-to-video. Drives Palmier Pro's generate_video, get_timeline, and get_media tools directly, with model selection grounded in this project's actual capabilities (dialogue/audio support, reference limits, resolution). Use whenever the user wants UGC-style video, influencer clips, talking-to-camera ad creative, \"make a video of [a person/product],\" or animating a still into motion — even if they don't say \"UGC\" explicitly. Pairs with the ugc-photo-prompts skill, which should run first to produce the anchor still.",
     "sha": "d499a8cd8d0a",
     "path": "skills/ugc-video-prompts/SKILL.md"
+  },
+  {
+    "id": "video-prompting",
+    "name": "video-prompting",
+    "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, podcast-ad.",
+    "sha": "21e28b4fbc51",
+    "path": "skills/video-prompting/SKILL.md"
   }
 ]
