@@ -41,6 +41,18 @@ Map the script onto generation beats that fit `list_models` durations (often 4�
 
 `list_models({ type: "image" })` → `generate_image` for each speaker.
 
+### Still models (validated)
+
+Across multi-room / multi-character side-by-sides, these three beat the rest for podcast start frames. Prefer them in this order; confirm ids via `list_models`:
+
+| Prefer | Model id | Notes |
+|--------|----------|-------|
+| **1st** | `grok-imagine` (Grok Imagine 2) | Strong photoreal + natural podcast staging |
+| **1st (tie)** | `gpt-image-2` (GPT Image 2) | Equally strong; use `resolution: "1024x1536"` for 9:16 (no aspectRatio enum) |
+| **1st (tie)** | `seedream-v5-pro` (Seedream 5.0 Pro) | Equally strong; aspect often `portrait_16_9` |
+
+Do **not** default to Nano Banana / Krea / Ideogram / Recraft / MAI / Reve for podcast stills unless the user asks or the preferred trio fails.
+
 These stills become shot / reverse-shot anchors. They must read as **the same locked-off podcast camera** with only the subject swapped — not two different setups.
 
 ### Hard rules (this is where most generations die)

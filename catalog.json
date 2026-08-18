@@ -10,7 +10,7 @@
     "id": "character-pipeline",
     "name": "character-pipeline",
     "description": "Builds consistent characters in Palmier Pro via hero still to multi-angle identity sheet to scene placement still to generate_video with ranked referenceImageMediaRefs (@Image1/@Image2/@Image3). Use when the same face must survive across shots, casting someone into a new environment, Seedance identity lock, or photoreal consistency before video. Not for quick UGC talking-head anchors — use ugc-photo-prompts for those.",
-    "sha": "c65536b4eaa6",
+    "sha": "e786541df5c4",
     "path": "skills/character-pipeline/SKILL.md"
   },
   {
@@ -38,7 +38,7 @@
     "id": "podcast-ad",
     "name": "podcast-ad",
     "description": "Builds converting podcast-style ads in Palmier Pro as an overheard two-person conversation — sceptic arc, believer mechanism, matching start frames, mic-in-shot staging, segmented generate_video beats, timeline assembly, and captions. Use for podcast ads, UGC conversation ads, sceptic-to-believer product spots — not for single-hook talking-head ads (use ugc-video-prompts).",
-    "sha": "b7cec2abcc6e",
+    "sha": "3d26f7f8d7b6",
     "path": "skills/podcast-ad/SKILL.md"
   },
   {
@@ -73,7 +73,7 @@
     "id": "video-prompting",
     "name": "video-prompting",
     "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, podcast-ad.",
-    "sha": "21e28b4fbc51",
+    "sha": "f11394ed3b80",
     "path": "skills/video-prompting/SKILL.md"
   }
 ]

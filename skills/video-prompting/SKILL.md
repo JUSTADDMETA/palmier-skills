@@ -94,7 +94,7 @@ Confirm ids/caps via `list_models` before firing. Default stack for these skills
 | Other goals | Prefer | Notes |
 |-------------|--------|-------|
 | Synced spoken dialogue | Kling V3/O3, or Grok | Quoted line; pin voice every beat |
-| Stills / sheets | Nano Banana Pro, GPT Image, Seedream | See `character-pipeline` |
+| Stills / sheets | `grok-imagine`, `gpt-image-2`, or `seedream-v5-pro` | Best of multi-room podcast bakeoff; see `character-pipeline` / `podcast-ad` |
 | Avoid as default | Veo | Content-checker failures common |
 
 ## Precise editing

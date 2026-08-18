@@ -32,7 +32,7 @@ Confirm via `list_models`:
 
 | Step | Prefer |
 |------|--------|
-| Hero / sheet / scene stills | Nano Banana Pro, GPT Image, or Seedream (photoreal sheets) |
+| Hero / sheet / scene stills | `grok-imagine`, `gpt-image-2`, or `seedream-v5-pro` (validated photoreal trio) |
 | Video iterate | `seedance-2-mini`, MiniMax H3 (`hailuo-03`), or Flux 3 with `draft: true` |
 | Video final | `seedance-2`, MiniMax H3, or Flux 3 **FLUX Enhance** via `enhanceDraftMediaRef` (draft only — not `upscale_media`) |
 
