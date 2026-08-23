@@ -9,15 +9,15 @@
   {
     "id": "character-pipeline",
     "name": "character-pipeline",
-    "description": "Builds consistent characters in Palmier Pro via hero still to multi-angle identity sheet to scene placement still to generate_video with ranked referenceImageMediaRefs (@Image1/@Image2/@Image3). Use when the same face must survive across shots, casting someone into a new environment, Seedance identity lock, or photoreal consistency before video. Not for quick UGC talking-head anchors — use ugc-photo-prompts for those.",
-    "sha": "e786541df5c4",
+    "description": "Builds consistent character stills in Palmier Pro — hero identity plate to seamless multi-angle sheet (bust and/or full-body) to environment plate to light-matched scene placement. Use when the same face must survive across stills, casting someone into a new environment, or photoreal identity lock before any later motion. Not for video prompting itself (hand off to video-prompting / cinematic-motion) and not for quick UGC talking-head anchors (use ugc-photo-prompts).",
+    "sha": "41851000b41a",
     "path": "skills/character-pipeline/SKILL.md"
   },
   {
     "id": "cinematic-motion",
     "name": "cinematic-motion",
-    "description": "Writes Palmier generate_video motion prompts with documentary handheld texture, timed effects inventories, density maps, and one signature visual moment so Seedance/Kling clips feel captured. Use for photoreal editorial motion, unstable handheld, rack focus, micro-gestures, beauty/product clips, or dialogue-to-camera moments that should look like a real shooter was rolling.",
-    "sha": "6b709f837846",
+    "description": "Writes Palmier generate_video motion prompts so clips feel captured — one readable camera move plus imperfect handheld texture, not a timid micro-settle. Use for photoreal editorial motion, unstable handheld, beauty/product, or dialogue-to-camera. Bakeoff note: naive \"slow cinematic push-in\" can beat an over-soft effects score; always lead with visible motion.",
+    "sha": "7b64dcdab088",
     "path": "skills/cinematic-motion/SKILL.md"
   },
   {
@@ -37,8 +37,8 @@
   {
     "id": "podcast-ad",
     "name": "podcast-ad",
-    "description": "Builds converting podcast-style ads in Palmier Pro as an overheard two-person conversation — sceptic arc, believer mechanism, matching start frames, mic-in-shot staging, segmented generate_video beats, timeline assembly, and captions. Use for podcast ads, UGC conversation ads, sceptic-to-believer product spots — not for single-hook talking-head ads (use ugc-video-prompts).",
-    "sha": "3d26f7f8d7b6",
+    "description": "Builds converting podcast-style ads in Palmier Pro as an overheard two-person conversation — sceptic arc, believer mechanism, opposed reverse-shot stills, locked voice + eyeline, exact off-screen backchannels, Flux-first beats, assemble + silence trim. Use for podcast ads, UGC conversation ads, sceptic-to-believer product spots — not for single-hook talking-head ads (use ugc-video-prompts).",
+    "sha": "142e1b1ecc16",
     "path": "skills/podcast-ad/SKILL.md"
   },
   {
@@ -73,7 +73,7 @@
     "id": "video-prompting",
     "name": "video-prompting",
     "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, podcast-ad.",
-    "sha": "f11394ed3b80",
+    "sha": "7e3c8585e5f9",
     "path": "skills/video-prompting/SKILL.md"
   }
 ]
