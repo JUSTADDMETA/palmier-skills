@@ -1,30 +1,31 @@
 ---
 name: character-pipeline
-description: Builds consistent characters in Palmier Pro via hero still to multi-angle identity sheet to scene placement still to generate_video with ranked referenceImageMediaRefs (@Image1/@Image2/@Image3). Use when the same face must survive across shots, casting someone into a new environment, Seedance identity lock, or photoreal consistency before video. Not for quick UGC talking-head anchors — use ugc-photo-prompts for those.
+description: Builds consistent character stills in Palmier Pro — hero identity plate to seamless multi-angle sheet (bust and/or full-body) to environment plate to light-matched scene placement. Use when the same face must survive across stills, casting someone into a new environment, or photoreal identity lock before any later motion. Not for video prompting itself (hand off to video-prompting / cinematic-motion) and not for quick UGC talking-head anchors (use ugc-photo-prompts).
 ---
 
 # Character Pipeline
 
-Identity dies when you jump straight to `generate_video`. Build **still truth** first, then animate with a ranked reference stack. Pair video prompts with `video-prompting` (and `cinematic-motion` for handheld texture).
+This skill is **stills-only**. It builds reusable identity assets so the same person holds across plates and composites. If the user wants motion after that, hand off the approved scene still + sheets to `video-prompting` / `cinematic-motion` — do not own `generate_video` here.
 
 ## Pipeline (hard order)
 
 ```
 1. Hero still          generate_image (or import_media / user photo)
 2. Multi-angle sheet   generate_image with referenceMediaRefs = [hero]
-3. Scene placement     generate_image: env plate + sheet (+ optional wardrobe ref)
-4. Fidelity close-up   optional generate_image or capture_frame from the scene still
-5. Video               generate_video with ranked referenceImageMediaRefs
+                       bust sheet default; optional full-body turnaround
+3. Environment plate   generate_image — empty set, locked camera/light
+4. Scene placement     generate_image: env plate + sheet (+ optional wardrobe)
+5. Fidelity close-up   optional generate_image or capture_frame from the scene still
 ```
 
-Do **not** call `generate_video` until sheets (and scene still) show ready in `get_media` — **no** `generationStatus`. Rerolling stills is cheap; video is not.
+Do **not** skip to scene placement without an approved sheet. Reroll stills until lighting and identity pass.
 
 ## Session gates
 
 - `get_timeline` → `canGenerate`
-- `list_models({ type: "image" })` then later `type: "video"`
+- `list_models({ type: "image" })`
 - Propose each paid generation; wait for confirmation
-- Folders e.g. `Character/Hero`, `Character/Sheets`, `Character/Scenes`, `Character/Takes`
+- Folders e.g. `Character/Hero`, `Character/Sheets`, `Character/Scenes`
 
 ## Model picks
 
@@ -32,11 +33,9 @@ Confirm via `list_models`:
 
 | Step | Prefer |
 |------|--------|
-| Hero / sheet / scene stills | `grok-imagine`, `gpt-image-2`, or `seedream-v5-pro` (validated photoreal trio) |
-| Video iterate | `seedance-2-mini`, MiniMax H3 (`hailuo-03`), or Flux 3 with `draft: true` |
-| Video final | `seedance-2`, MiniMax H3, or Flux 3 **FLUX Enhance** via `enhanceDraftMediaRef` (draft only — not `upscale_media`) |
+| Hero / sheet / env / scene | `grok-imagine`, `gpt-image-2`, or `seedream-v5-pro` (photoreal trio) |
 
-Trust each model's aspect enums from `list_models` (some image models use labels like `landscape_16_9`).
+Prefer `gpt-image-2` / `seedream-v5-pro` for any step that needs `referenceMediaRefs` if the current Grok build rejects refs. Trust each model's aspect/resolution enums from `list_models`.
 
 ## Step 1 — Hero still
 
@@ -52,20 +51,40 @@ If the user supplies a photo, `import_media` and skip generation.
 
 `generate_image` with `referenceMediaRefs: [heroMediaRef]`.
 
-Requirements:
+### Head / bust sheet (default — identity lock)
 
-- 4 panels side by side: front, left profile, right profile, back of head (or a fixed multi-panel grid if matching another project skill's proven layout)
+- 4 views in one continuous image, left → right: front, left profile, right profile, back of head
+- **No white gutters, borders, frames, or panel dividers** — seamless shared grey BG
 - Neutral light grey BG; even studio light; no color cast
-- Same crop, height, distance every panel
-- Identical simple wardrobe across panels
-- Neutral expression unless user wants otherwise
+- Same crop, height, distance every view (chest-up / bust)
+- Identical simple wardrobe; neutral expression unless asked otherwise
 - Exact facial structure from hero
+- **Detail emphasis:** razor-sharp focus, pores/microtexture, hair strands, fabric weave — no soft blur / beauty mush
 - Clinical identity sheet — not fashion/editorial
 - No vignette, no grade, no text watermark
 
-## Step 3 — Scene placement still
+For GPT Image 2: `quality: "high"` and prefer **`3840x2160`** (or at least `2560x1440`) when detail matters.
 
-Composite the character into a locked environment plate.
+### Full-body turnaround (optional — wardrobe / silhouette)
+
+When scene placement needs legs, stance, or clothing behavior:
+
+- 4 full-body views in one continuous image — same no-gutter rules
+- Shared grey floor+BG; identical wardrobe; consistent height/stance
+- Head still matches hero; proportions consistent across views
+- Same detail emphasis; `quality: "high"` + high res when available
+
+Keep both when useful: **bust sheet** for face lock; **full-body** for whole-figure staging.
+
+## Step 3 — Environment plate
+
+Empty set only — **no people**. Lock camera, furniture, and lighting before the insert.
+
+State practicals explicitly (window cool vs lamp warm, etc.) so scene placement has sources to match.
+
+## Step 4 — Scene placement still
+
+Composite the character into the locked environment plate.
 
 ```
 Preserve the entire scene exactly: <env elements>.
@@ -75,27 +94,19 @@ Insert the subject from the character reference sheet — <short identity anchor
 Pose: <body contacts, gaze, expression>.
 Wardrobe: <from clothing ref if any — fabric behavior in THIS pose>.
 Anatomy fully correct — natural joints, no elongation, believable foreshortening.
-Match the scene's existing light direction and softness.
+Match the scene's existing light direction, color temperature, intensity, and softness
+exactly — subject lit only by sources visible in the plate (no extra beauty key).
+Warm/cool splits, falloff, and contact shadows must match furniture in the plate.
 Skin texture preserved — no retouching.
 ```
 
-Example `referenceMediaRefs` order: `[environmentPlate, characterSheet, clothingRef]` — state each ref's job in the prompt.
+`referenceMediaRefs` order: `[environmentPlate, characterSheet, …]` — state each ref's job in the prompt.
 
-**Environment plate** wins on camera and set. **Sheet** wins on face.
-
-## Step 4 — Ranked refs for generate_video
-
-| Order in `referenceImageMediaRefs` | Prompt tag | Role |
-|------------------------------------|------------|------|
-| [0] | `@Image1` | Environment / staging / opening composition |
-| [1] | `@Image2` | Identity sheet (structure across angles) |
-| [2] | `@Image3` | Fidelity close-up — match this face, light, proximity |
-
-Declare that split in `[REFERENCE USE]`. Optionally also pass the scene still as `startFrameMediaRef` when the model supports first frame and motion should begin on that plate.
+**Environment plate** wins on camera, set, **and lighting**. **Sheet** wins on face. If the insert looks beauty-lit or flatter than the plate, reroll with explicit dual-source / falloff language.
 
 ## Identity lock block
 
-Keep a short stable paragraph and paste into every later prompt (update to the actual character):
+Keep a short stable paragraph and paste into every later still prompt (update to the actual character):
 
 ```
 Olive-warm skin, dark brown eyes, strong brow, full lips, high cheekbones,
@@ -110,16 +121,15 @@ Consistency > poetry.
 1. Neutral garment on the identity sheet when possible
 2. Separate clothing still via `generate_image` / import
 3. Scene placement binds fabric behavior to pose
-4. Video `[IDENTITY LOCKS]` + negative: no wardrobe change
 
 ## Anti-patterns
 
-- Video from one glam selfie, no sheet → angle drift
-- Sheet panels with different light/crop → four different people
-- Scene placement that “improves” the plate's camera → breaks continuity
-- `generate_video` before sheets are ready
+- Jumping to video from this skill (hand off instead)
+- Sheet panels with gutters or different light/crop → four different people
+- Soft / low-res sheets when face lock matters
+- Scene placement that “improves” the plate's camera or beauty-relights the subject
 - Rewording identity every call → slow face melt
 
-## Handoff
+## Handoff (optional)
 
-After the scene still is approved → `cinematic-motion` for the effects timeline, keeping this ranking in `referenceImageMediaRefs`.
+When stills are approved and the user wants motion: pass scene still + sheets to `video-prompting` / `cinematic-motion`. Suggested ref ranking for those skills: env/scene → sheet → face close-up — declared in their prompts, not here.

@@ -166,6 +166,23 @@ Preserve identity, timing, occlusion, eyeline, camera, layout, dialogue, ambienc
 
 Debug order: authority → locks → timing → preserve → then adjectives.
 
+## Bakeoff notes (T2V, cheap 480p/720p, Aug 2026)
+
+Project: `Skill Bakeoff CM+VP` · timeline **Video Prompting Bakeoff**. No refs — text-only stress test of architecture vs vibe.
+
+| Finding | Implication |
+|---------|-------------|
+| Screen geography (woman LEFT / man RIGHT) held on Seedance Mini | Keep explicit L/R before action |
+| Exact quoted dialogue landed on Grok + Gemini Omni Flash | Pin line + voice every call; works without audio refs |
+| “Alone” failed when SCENE said busy café (extras appeared) | Negatives must ban extras: “no other people visible” |
+| Vibe-only romantic prompt invented a kiss + uncontrolled action | Architecture buys **control**, not prettier stills |
+| Chaos anti-prompt (swap sides / look at cam / third person) did all three | Geography + subject-count locks are load-bearing |
+| Silhouette + solid field + freeze/kinetic (Seedance Mini, Happy Horse) | Stylized recipe works without refs |
+| Texture morph macro→canyon (Seedance Mini) | Continuous transform recipe is strong |
+| Product pour timed late on Flux draft | Shot-list timing is approximate; put critical action mid-clip |
+| Landscape “one tracking shot” on LTX still cut angles | Prefer one beat per call; assemble multi-angle on timeline |
+| Kling V3 jobs often sit in `generating` much longer than Seedance/Grok/Flux draft | Prefer Mini/Grok/Flux draft for cheap iteration |
+
 ## Checklist before generate_video
 
 - [ ] User confirmed cost; `list_models` current
