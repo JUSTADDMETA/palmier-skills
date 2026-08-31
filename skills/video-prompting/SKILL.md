@@ -21,6 +21,7 @@ Write a **production brief**, not a vibe paragraph. Models fail when every asset
 | Overheard two-person podcast ad | `podcast-ad` |
 | UGC talking-head / product selfie | `ugc-photo-prompts` → `ugc-video-prompts` |
 | Assemble / caption finished clips | `ugc-editing` |
+| Kinetic titles / flat glass UI / H3 product journey promos | `h3-max-motion-graphics` |
 
 ## Session gates
 
@@ -105,7 +106,7 @@ Confirm ids/caps via `list_models` before firing. Default stack for these skills
 
 ## Text and titles
 
-Video models **cannot** render readable text. Title cards / logos: `generate_image` plates or `add_texts` on the timeline — never rely on the video model for type.
+Most video models **cannot** render reliable readable text — use `generate_image` plates or `add_texts`. **Exception:** MiniMax H3 / H3 Max kinetic flat type with an exact string allowlist — follow `h3-max-motion-graphics` (do not improvise long paragraphs of type).
 
 ## Recipes (near-look patterns)
 
