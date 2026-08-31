@@ -1,13 +1,13 @@
 ---
 name: motion-graphics
-description: Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max / H3 — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and logo refs. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.
+description: Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max (hailuo-03-max) — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and image/video refs including logos. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.
 ---
 
 # Motion graphics
 
-Flat **kinetic type + UI motion graphics** in Palmier. Default models: MiniMax **H3 Max** / **H3** — they can hold **exact short strings** when locked. Most other video models cannot; use `generate_image` / `add_texts` for those.
+Flat **kinetic type + UI motion graphics** in Palmier. **Always use MiniMax H3 Max (`hailuo-03-max`)** — it holds exact short strings when locked and **accepts image/video refs** (logos, UI plates, short clips). Most other video models are weaker at readable type; use `generate_image` / `add_texts` for those.
 
-Confirm caps with `list_models({ type: "video" })` before every generate.
+Confirm live caps with `list_models({ type: "video" })` before every generate (resolutions, durations, ref limits drift).
 
 ## Two jobs (pick one)
 
@@ -18,23 +18,21 @@ Confirm caps with `list_models({ type: "video" })` before every generate.
 
 Do not mix a style sting with a product film in one generate.
 
-## Model routing
+## Model
 
 | Need | Model | Notes |
 |------|-------|--------|
-| Flat MG / titles / glass UI (default) | `hailuo-03-max` | Frames only — **no** refs. Prefer **768p**. 5–15s. |
-| Exact logo in-shot | `hailuo-03` | `@Image1` = mark only. 2K. |
-| Logo open on Max | `hailuo-03-max` + `startFrameMediaRef` | Weaker continuity than `@Image1`. |
-| True trim V2V | Aleph / Happy Horse Edit / … | `sourceVideoMediaRef` + `sourceClipId`. |
+| **All MG in this skill** | `hailuo-03-max` | Default. Prefer highest listed res (often **768p**). Use `@Image1` / `referenceImageMediaRefs` for logos and UI plates; `@Video1` / video refs when caps allow. Start/end frames OK when useful. |
+| True trim V2V edit (not MG) | Aleph / Happy Horse Edit / … | `sourceVideoMediaRef` + `sourceClipId` — outside this skill’s lane. |
 
-Max cannot take image/video refs. Hybrids on Max → `startFrameMediaRef` + “animate from the start frame.”
+Do **not** route logo or ref work to `hailuo-03` unless the user explicitly asks or Max is unavailable in `list_models`.
 
 ## Session gates
 
 1. `get_timeline` — if `canGenerate` is false, ask sign-in / subscribe.
-2. `list_models({ type: "video" })`.
-3. Propose prompt + duration + aspect + resolution (+ logo/start frame). **Wait for confirmation.**
-4. `generate_video` into a folder. Do not busy-poll.
+2. `list_models({ type: "video" })` — confirm `hailuo-03-max` + ref caps.
+3. Propose prompt + duration + aspect + resolution (+ refs/frames). **Wait for confirmation.**
+4. `generate_video` with `model: "hailuo-03-max"`. Do not busy-poll.
 5. Assemble with `create_timeline` + `add_clips`. Retry failures once.
 
 ## Hard rules
@@ -129,7 +127,6 @@ Flat Apple-glass kinetic product film. Orthographic 2D.
 Frosted UI, hairlines, almost no drop shadows. Accent <HEX> RARE only.
 
 @Image1 = <LOGO> mark — exact geometry when it appears; ignore @Image1 background.
-(OR Max: start frame logo plate + keep that exact mark.)
 
 Only strings (exact, no others):
 "<LINE_1>"
@@ -150,8 +147,7 @@ TEMPO ARC (unequal):
 Switch UI each act. Always moving. No people. No photoreal devices. No fake digits.
 ```
 
-**Logo-accurate:** `hailuo-03` + `referenceImageMediaRefs` + `@Image1`.  
-**Max fallback:** `hailuo-03-max` + `startFrameMediaRef`.
+**Logo / plate lock:** `hailuo-03-max` + `referenceImageMediaRefs` + `@Image1` (and more `@ImageN` if needed). Optional `startFrameMediaRef` when the open must match a plate exactly — confirm via `list_models` whether frames and refs can combine.
 
 ### Iteration fixes
 
@@ -162,7 +158,7 @@ Switch UI each act. Always moving. No people. No photoreal devices. No fake digi
 | Repetitive UI | New motif every act |
 | Too 3D / plasticky | Orthographic frosted 2D |
 | Fake shadows | Hairlines + speculars |
-| Melted logo | H3 + `@Image1` clean mark |
+| Melted logo | Clean mark still + `@Image1` on Max |
 | Wrong copy | Re-lock allowlist from script |
 
 ---
@@ -171,11 +167,16 @@ Switch UI each act. Always moving. No people. No photoreal devices. No fake digi
 
 ```
 generate_video({
-  model: "hailuo-03-max",  // or hailuo-03 with logo refs
-  prompt, duration, aspectRatio, resolution,
+  model: "hailuo-03-max",
+  prompt,
+  duration,
+  aspectRatio,
+  resolution,  // prefer top Max tier from list_models
   folder: "Motion-Graphics/…",
   name,
-  startFrameMediaRef?, referenceImageMediaRefs?
+  referenceImageMediaRefs?,  // logos / UI plates
+  referenceVideoMediaRefs?,  // short clips if caps allow
+  startFrameMediaRef?
 })
 ```
 
@@ -183,7 +184,7 @@ Then `create_timeline` + sequential `add_clips`. Keep variants separate.
 
 ## Anti-patterns
 
-Even 2s chops · same card loop · accent wash · 3D glass slabs · muddy shadows · palette-only “styles” · still→I2V for a video beat · invented UI copy · text-only “use the logo”
+Even 2s chops · same card loop · accent wash · 3D glass slabs · muddy shadows · palette-only “styles” · still→I2V for a video beat · invented UI copy · text-only “use the logo” · routing MG to non-Max models by default
 
 ## Not this skill
 

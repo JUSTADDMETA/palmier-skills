@@ -30,8 +30,8 @@
   {
     "id": "motion-graphics",
     "name": "motion-graphics",
-    "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max / H3 — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and logo refs. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
-    "sha": "88e254fa7d58",
+    "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max (hailuo-03-max) — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and image/video refs including logos. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
+    "sha": "84b4423c5c60",
     "path": "skills/motion-graphics/SKILL.md"
   },
   {
