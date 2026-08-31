@@ -1,6 +1,6 @@
 ---
 name: video-prompting
-description: Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, podcast-ad.
+description: Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, motion-graphics, podcast-ad.
 ---
 
 # Video Prompting
@@ -21,7 +21,7 @@ Write a **production brief**, not a vibe paragraph. Models fail when every asset
 | Overheard two-person podcast ad | `podcast-ad` |
 | UGC talking-head / product selfie | `ugc-photo-prompts` → `ugc-video-prompts` |
 | Assemble / caption finished clips | `ugc-editing` |
-| Kinetic titles / flat glass UI / H3 product journey promos | `h3-max-motion-graphics` |
+| Kinetic titles / flat glass UI / H3 product journey promos | `motion-graphics` |
 
 ## Session gates
 
@@ -106,7 +106,7 @@ Confirm ids/caps via `list_models` before firing. Default stack for these skills
 
 ## Text and titles
 
-Most video models **cannot** render reliable readable text — use `generate_image` plates or `add_texts`. **Exception:** MiniMax H3 / H3 Max kinetic flat type with an exact string allowlist — follow `h3-max-motion-graphics` (do not improvise long paragraphs of type).
+Most video models **cannot** render reliable readable text — use `generate_image` plates or `add_texts`. **Exception:** MiniMax H3 / H3 Max kinetic flat type with an exact string allowlist — follow `motion-graphics` (do not improvise long paragraphs of type).
 
 ## Recipes (near-look patterns)
 

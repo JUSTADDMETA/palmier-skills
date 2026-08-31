@@ -28,11 +28,11 @@
     "path": "skills/color-grading/SKILL.md"
   },
   {
-    "id": "h3-max-motion-graphics",
-    "name": "h3-max-motion-graphics",
-    "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro with MiniMax H3 Max / H3 — exact string locks, journey tempo (not metronome chops), sparse accents, switching UI motifs, product-native chrome, and logo refs. Use for H3 Max / MiniMax motion graphics, kinetic type, cold opens, bumpers, glassy UI explainer spots, Introducing product films, agent demos, or recreating H3 MG bakeoff looks. Prefer over video-prompting for readable on-screen type. Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
-    "sha": "12e5bf453499",
-    "path": "skills/h3-max-motion-graphics/SKILL.md"
+    "id": "motion-graphics",
+    "name": "motion-graphics",
+    "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max / H3 — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and logo refs. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
+    "sha": "88e254fa7d58",
+    "path": "skills/motion-graphics/SKILL.md"
   },
   {
     "id": "multi-cam-editing",
@@ -79,8 +79,8 @@
   {
     "id": "video-prompting",
     "name": "video-prompting",
-    "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, podcast-ad.",
-    "sha": "bac1b4ff264c",
+    "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, motion-graphics, podcast-ad.",
+    "sha": "eaf75f8c49a2",
     "path": "skills/video-prompting/SKILL.md"
   }
 ]
