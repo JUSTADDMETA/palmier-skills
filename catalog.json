@@ -28,6 +28,13 @@
     "path": "skills/color-grading/SKILL.md"
   },
   {
+    "id": "create-skill-from-timeline",
+    "name": "create-skill-from-timeline",
+    "description": "Reverse-engineer a finished Palmier Pro timeline into a reusable SKILL.md that recreates the same edit from the same footage with no prior context, or applies the same style to new footage with minimal tweaks. Use when the user asks to create a skill, save a template, distill this edit into a playbook, document how this video was built, or turn a timeline / chat session into a reusable workflow.",
+    "sha": "f1fecf5839ba",
+    "path": "skills/create-skill-from-timeline/SKILL.md"
+  },
+  {
     "id": "motion-graphics",
     "name": "motion-graphics",
     "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max (hailuo-03-max) — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and image/video refs including logos. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
