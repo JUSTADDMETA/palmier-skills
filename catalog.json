@@ -7,6 +7,20 @@
     "path": "skills/caption-templates/SKILL.md"
   },
   {
+    "id": "character-pipeline",
+    "name": "character-pipeline",
+    "description": "Builds consistent character stills in Palmier Pro — hero identity plate to seamless multi-angle sheet (bust and/or full-body) to environment plate to light-matched scene placement. Use when the same face must survive across stills, casting someone into a new environment, or photoreal identity lock before any later motion. Not for video prompting itself (hand off to video-prompting / cinematic-motion) and not for quick UGC talking-head anchors (use ugc-photo-prompts).",
+    "sha": "41851000b41a",
+    "path": "skills/character-pipeline/SKILL.md"
+  },
+  {
+    "id": "cinematic-motion",
+    "name": "cinematic-motion",
+    "description": "Writes Palmier generate_video motion prompts so clips feel captured — one readable camera move plus imperfect handheld texture, not a timid micro-settle. Use for photoreal editorial motion, unstable handheld, beauty/product, or dialogue-to-camera. Bakeoff note: naive \"slow cinematic push-in\" can beat an over-soft effects score; always lead with visible motion.",
+    "sha": "7b64dcdab088",
+    "path": "skills/cinematic-motion/SKILL.md"
+  },
+  {
     "id": "color-grading",
     "name": "color-grading",
     "description": "Color grade clips the way a professional colorist does — normalize, balance, match, then build a look — using inspect_color scopes and apply_color (exposure, white balance, wheels, curves, hue curves, LUTs). Use when the user asks to color, grade, match shots, fix white balance, fix exposure, neutralize a cast, or apply a look/film stock.",
@@ -21,11 +35,25 @@
     "path": "skills/create-skill-from-timeline/SKILL.md"
   },
   {
+    "id": "motion-graphics",
+    "name": "motion-graphics",
+    "description": "Kinetic titles, stings, Apple-flat glass UI motion, and scripted product promos in Palmier Pro via MiniMax H3 Max (hailuo-03-max) — exact string locks, journey tempo (not metronome chops), sparse accents, switching product-native UI, and image/video refs including logos. Use for motion graphics, kinetic type, cold opens, bumpers, glassy UI explainers, Introducing product films, or agent demos. Prefer over video-prompting for readable on-screen type. Not for photoreal handheld camera feel (use cinematic-motion). Sibling: video-prompting for cinematic multimodal; caption-templates for timeline captions.",
+    "sha": "84b4423c5c60",
+    "path": "skills/motion-graphics/SKILL.md"
+  },
+  {
     "id": "multi-cam-editing",
     "name": "multi-cam-editing",
     "description": "Edit multi-camera / shared-audio sessions (podcasts, interviews, panels) inside Palmier Pro — create a multicam group first, verify sync and mic-to-person mapping, then cut angles to the speaker with wide/layout moments for overlap. Use whenever the footage has multiple cameras, multiple mics, dual-system sound, or the user mentions multicam, multi-cam, podcast edit, interview cut, camera switching, or synced audio.",
     "sha": "0ced8caf49ed",
     "path": "skills/multi-cam-editing/SKILL.md"
+  },
+  {
+    "id": "podcast-ad",
+    "name": "podcast-ad",
+    "description": "Builds converting podcast-style ads in Palmier Pro as an overheard two-person conversation — sceptic arc, believer mechanism, opposed reverse-shot stills, locked voice + eyeline, exact off-screen backchannels, Flux-first beats, assemble + silence trim. Use for podcast ads, UGC conversation ads, sceptic-to-believer product spots — not for single-hook talking-head ads (use ugc-video-prompts).",
+    "sha": "142e1b1ecc16",
+    "path": "skills/podcast-ad/SKILL.md"
   },
   {
     "id": "timeless-love-story",
@@ -54,5 +82,12 @@
     "description": "Generate ultra-realistic UGC/influencer-style video clips inside Palmier Pro — talking selfies, product demos, candid lifestyle motion — using the proven still-then-animate pipeline instead of cold text-to-video. Drives Palmier Pro's generate_video, get_timeline, and get_media tools directly, with model selection grounded in this project's actual capabilities (dialogue/audio support, reference limits, resolution). Use whenever the user wants UGC-style video, influencer clips, talking-to-camera ad creative, \"make a video of [a person/product],\" or animating a still into motion — even if they don't say \"UGC\" explicitly. Pairs with the ugc-photo-prompts skill, which should run first to produce the anchor still.",
     "sha": "d499a8cd8d0a",
     "path": "skills/ugc-video-prompts/SKILL.md"
+  },
+  {
+    "id": "video-prompting",
+    "name": "video-prompting",
+    "description": "Base craft for AI video prompts inside Palmier Pro across Seedance, Kling, MiniMax H3/Hailuo, Grok, and Veo. Assigns @Image/@Video/@Audio authority, locks identity and screen geography, then stages timed shots. Use for generate_video multimodal prompts, precise video edits, or cinematic AI video beyond simple UGC talking-head beats. For UGC selfie-then-animate prefer ugc-photo-prompts then ugc-video-prompts. Specialized siblings: character-pipeline, cinematic-motion, motion-graphics, podcast-ad.",
+    "sha": "eaf75f8c49a2",
+    "path": "skills/video-prompting/SKILL.md"
   }
 ]
